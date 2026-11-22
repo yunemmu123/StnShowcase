@@ -42,6 +42,7 @@ const RAR=[['exclusive','Exclusive','#ff9a1f'],['divine','Divine','#f4e1ff'],['l
 const CAT=[['D','Damage'],['S','Support'],['F','Farm'],['P','Pets']];
 const RC=Object.fromEntries(RAR.map(r=>[r[0],r[2]])),RI=Object.fromEntries(RAR.map((r,i)=>[r[0],i]));
 const KEY='towerInv1',MAX=99;
+const mx=o=>o.t==='P'?5:['Military Base','Medical Base','Protector Base'].includes(o.n)?6:['Crossbow','Turret'].includes(o.n)?10:o.r==='divine'?9:8;
 let S={lv:{},evo:{},t:'',u:'',sort:'r',un:false};
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
 const $=id=>document.getElementById(id);
@@ -56,7 +57,7 @@ function build(){
  groups().forEach(g=>{const h=document.createElement('div');h.className='sec';h.textContent=g.n;h.style.color=g.c;L.appendChild(h);
   const gr=document.createElement('div');gr.className='grid';
   g.it.forEach(i=>{const o=ITEMS[i],c=document.createElement('div');c.className='card';c.style.setProperty('--c',RC[o.r]);c.dataset.i=i;
-   c.innerHTML='<img alt="" src="'+o.i+'"><b>'+o.n+'</b><select aria-label="'+o.n+' level">'+[...Array(10)].map((_,k)=>'<option value="'+(k+1)+'">LVL '+(k+1)+'</option>').join('')+'<option value="99">MAX</option></select>'+(o.e?'<button class="evo"></button>':'');
+   c.innerHTML='<img alt="" src="'+o.i+'"><b>'+o.n+'</b><select aria-label="'+o.n+' level">'+[...Array(mx(o)-1)].map((_,k)=>'<option value="'+(k+1)+'">LVL '+(k+1)+'</option>').join('')+'<option value="99">MAX</option></select>'+(o.e?'<button class="evo"></button>':'');
    const s=c.querySelector('select'),eb=c.querySelector('.evo');if(eb)eb.onclick=e=>{e.stopPropagation();S.evo[o.n]=!S.evo[o.n];if(!S.lv[o.n])S.lv[o.n]=MAX;sync()};
    s.onclick=e=>e.stopPropagation();
    s.onchange=()=>{S.lv[o.n]=+s.value;sync()};
@@ -64,7 +65,7 @@ function build(){
    gr.appendChild(c)});L.appendChild(gr)});
  sync(true)}
 function sync(skip){
- document.querySelectorAll('.card').forEach(c=>{const o=ITEMS[c.dataset.i],v=S.lv[o.n]||0;c.classList.toggle('own',!!v);c.querySelector('select').value=v||MAX;const eb=c.querySelector('.evo');if(eb){eb.textContent='EVO: '+(S.evo[o.n]?'Yes':'No');eb.classList.toggle('on',!!S.evo[o.n])}});
+ document.querySelectorAll('.card').forEach(c=>{const o=ITEMS[c.dataset.i];let v=S.lv[o.n]||0;if(v&&v!==MAX&&v>=mx(o))v=S.lv[o.n]=MAX;c.classList.toggle('own',!!v);c.querySelector('select').value=v||MAX;const eb=c.querySelector('.evo');if(eb){eb.textContent='EVO: '+(S.evo[o.n]?'Yes':'No');eb.classList.toggle('on',!!S.evo[o.n])}});
  $('un').textContent='Show unowned: '+(S.un?'On':'Off');$('un').classList.toggle('on',S.un);
  save();draw()}
 function rr(x,c,a,b,w,h,r){x.beginPath();x.roundRect(a,b,w,h,r)}
